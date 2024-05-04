@@ -28,12 +28,14 @@ class Library {
         void AddBook();
         void DisplayBooks();
         void LoadBooks();
+        void MainMenu();
+        void BookSearch();
 };
 
 int main() {
     Library l;
     l.LoadBooks();
-    l.DisplayBooks();
+    l.MainMenu();
 }
 
 //Books Member Funcitons
@@ -91,7 +93,7 @@ void Books::Return()
 
 void Books::Displaybook()
 {
-    cout << "Title: " << title << endl;
+    cout << endl << "Title: " << title << endl;
     cout << "Author: " << author << endl;
     cout << "Genre: " << genre << endl;
     cout << "Availibility: ";
@@ -101,6 +103,72 @@ void Books::Displaybook()
 
 //Library Member Functions
 
+void Library::MainMenu() {
+        char choice;
+    do {
+        cout << endl << "Welcome To Our Library" << endl;
+        cout << "Please Enter Your Choice: " << endl;
+        cout << "[S] To Search For Books." << endl;
+        cout << "[C] To Checkout A Book." << endl;
+        cout << "[R] To Return A Book." << endl;
+        cout << "[E] To EXIT The Program..." << endl;
+        cin >> choice;
+        switch(choice) {
+            case 'S':
+            case 's': {BookSearch();break;}
+        }
+    }
+    while(choice != 'e' || choice != 'E');
+}
+void Library::BookSearch() {
+    int schoice;
+    char exitchoice;
+    cout << "Search By: " << "[1] Title  " << "[2] Author  " << "[3] Genre  " << endl;
+    cout << "Press Anything Else To Exit" << endl;
+    cin >> schoice;
+    switch(schoice) {
+        case 1: {
+            cout << "Enter Title(Please Follow \"Title Case\" While Typing): " << endl;
+            string ftitle;
+            cin.ignore();
+            getline(cin,ftitle);
+            for(Books obb: b) {
+                if (obb.title == ftitle) {
+                    obb.Displaybook();
+                }
+            }
+            break;
+            }
+        case 2: {
+            cout << "Enter Author(Please Follow \"Title Case\" While Typing): " << endl;
+            string fauthor;
+            cin.ignore();
+            getline(cin,fauthor);
+            for(Books obb: b) {
+                if(obb.author == fauthor) {
+                    obb.Displaybook();
+                }
+            }
+            break;
+        }
+        case 3: {
+            cout << "Enter Genre(Please Follow \"Title Case\" While Typing): " << endl;
+            string fgenre;
+            cin >> fgenre;
+            for(Books obb: b) {
+                if(obb.genre == fgenre) {
+                    obb.Displaybook();
+                }
+            }
+            break;
+        }
+        default: {
+            cout << "Exiting Search...." << endl;
+            break;
+        }
+        }
+    }
+ 
 void Library::AddBook()
 {
     Books obb;
