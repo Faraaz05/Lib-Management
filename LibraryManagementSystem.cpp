@@ -1,3 +1,22 @@
+/* Library Management system
+consists of source .cpp file, BooKData.txt,Userdata.txt(for storing data between executions)
+
+first the data from BooKData.txt & Userdata.txt is loaded and parsed and stored in their respectice classes
+then the User interaction occurs
+
+after the user is done modifying the books and user data. the BooKData.txt & Userdata.txt files are 
+overwritten with the changes so that the changes can be stored
+
+it is recommended to not manually alter the text files since the data parser heavily relies on a fixed syntax
+when inputting data make sure to use "Title Case" since the data IS CASE SENSITIVE.
+
+bookdata.txt already contains some preadded books which will automatically get stored in objects
+
+Make sure to EXIT the program through the MAINMENU so the changes made are SAVED
+
+still yet to add some input constraints and solve some edge cases
+*/
+
 #include <string>
 #include <iostream>
 #include <vector>
@@ -35,6 +54,7 @@ class Library {
     vector<User> u;
     public: 
         void AddBook();
+        void RemoveBook();
         void DisplayBooks();
         void LoadBooks();
         void MainMenu();
@@ -95,7 +115,7 @@ void Books::Storedata()
     }
     else
     {
-        cerr << "Error Opening File...";
+        cerr << "Error Opening File..." << endl;
     }
     outfile.close();
 }
@@ -104,7 +124,7 @@ void Books::Checkout()
 {
     if(avail_status == 1) {
         avail_status = 0;
-        cout << "You Have Checked Out \"" << title  << "\"By " << author << endl;
+        cout << "You Have Checked Out \"" << title  << "\" By " << author << endl;
     }
     else {
         cout << "Sorry.. This Book Is Currently Unavailable Please Try Again Later" << endl;
@@ -139,6 +159,8 @@ void Library::MainMenu() {
         cout << endl << "Welcome To Our Library" << endl;
         cout << "Please Enter Your Choice: " << endl;
         cout << "[S] To Search For Books." << endl;
+        cout << "[A] To Add Books" << endl;
+        cout << "[M] To Remove Books" << endl;
         cout << "[C] To Checkout A Book." << endl;
         cout << "[R] To Return A Book." << endl;
         cout << "[E] To EXIT The Program..." << endl;
@@ -150,6 +172,10 @@ void Library::MainMenu() {
             case 'c': {UserCheckout();break;}
             case 'R':
             case 'r': {UserReturn();break;}
+            case 'A':
+            case 'a': {AddBook();break;}
+            case 'm':
+            case 'M': {RemoveBook();break;}
         }
     }
     while(!(choice == 'e' || choice == 'E'));
@@ -157,7 +183,7 @@ void Library::MainMenu() {
 void Library::BookSearch() {
     int schoice;
     char exitchoice;
-    cout << "Search By: " << "[1] Title  " << "[2] Author  " << "[3] Genre  " << endl;
+    cout << "Search By: " << "[1] Title  " << "[2] Author  " << "[3] Genre  " << "[4] All Books  " << endl;
     cout << "Press Anything Else To Exit" << endl;
     cin >> schoice;
     switch(schoice) {
@@ -196,6 +222,9 @@ void Library::BookSearch() {
             }
             break;
         }
+        case 4: {
+            DisplayBooks();
+        }
         default: {
             cout << "Exiting Search...." << endl;
             break;
@@ -207,6 +236,21 @@ void Library::AddBook()
 {
     Books obb;
     b.push_back(obb);
+}
+
+void Library::RemoveBook() {
+    int tisbn;
+    cout << "Enter ISBN Of Book You Want To Remove: ";  
+    cin >> tisbn;
+    cout << endl;
+    auto rbook = ISBNSearch(tisbn);
+    if(rbook != b.end()) {
+        cout << "Removing \"" << rbook->title << "\" By " << rbook->author << endl; 
+        b.erase(rbook);
+    }
+    else {
+        cout << "No Such Books Exist In DataBase" << endl;
+    }
 }
 
 void Library::DisplayBooks()
