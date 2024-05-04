@@ -22,20 +22,37 @@ class Books {
         friend class Library;
 };
 
+class User {
+    string name;
+    int tISBN;
+        public: 
+            void getinfo();
+            friend class Library;
+            void printuser() {
+                cout << name;
+                cout << tISBN;
+            }
+};
+
 class Library {
     vector<Books> b;
+    vector<User> u;
     public: 
         void AddBook();
         void DisplayBooks();
         void LoadBooks();
         void MainMenu();
         void BookSearch();
+        void UserCheckout();
+        void UserReturn();
+        std::vector<Books>::iterator ISBNSearch(int tISBN);
 };
 
 int main() {
     Library l;
     l.LoadBooks();
     l.MainMenu();
+    l.DisplayBooks();
 }
 
 //Books Member Funcitons
@@ -116,9 +133,13 @@ void Library::MainMenu() {
         switch(choice) {
             case 'S':
             case 's': {BookSearch();break;}
+            case 'C':
+            case 'c': {UserCheckout();break;}
+            case 'R':
+            case 'r': {UserReturn();break;}
         }
     }
-    while(choice != 'e' || choice != 'E');
+    while(!(choice == 'e' || choice == 'E'));
 }
 void Library::BookSearch() {
     int schoice;
@@ -235,4 +256,50 @@ void Library::LoadBooks()
         cout << "Book Database File Corrupted";
     }
     infile.close();
-};
+}
+
+void Library::UserCheckout() {
+    User tu;
+    tu.getinfo();
+    cout << "Enter ISBN Of Book To CheckOut: ";
+    cin >> tu.tISBN;
+    auto CheckoutBook = ISBNSearch(tu.tISBN);
+    u.push_back(tu);
+    CheckoutBook->Checkout();
+    tu.printuser();
+}
+
+std::vector<Books>::iterator Library::ISBNSearch(int tISBN) {
+        for (auto it = b.begin(); it != b.end();) {
+            if(it->ISBN == tISBN) {
+                return it;
+            }
+            else {
+                it++;
+            }
+        }
+    }
+
+
+void Library::UserReturn() {
+    User tu;
+    tu.getinfo();
+    for (auto it = u.begin(); it != u.end();) {
+        if(tu.name == it->name) {
+            auto ReturnBook = ISBNSearch(it->tISBN);
+            ReturnBook->Return();
+            it->printuser();
+            u.erase(it);
+            break;
+        }
+        else {
+            it++;
+        }
+    }
+}
+
+void User::getinfo() {
+    cout << "Enter Name: " << endl;
+    cin.ignore();
+    getline(cin,name);
+}
