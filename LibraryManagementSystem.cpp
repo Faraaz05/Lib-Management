@@ -1,7 +1,6 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include <iomanip>
 #include <fstream>
 #include <string>
 using namespace std;
@@ -27,11 +26,8 @@ class User {
     int tISBN;
         public: 
             void getinfo();
+            void StoreUser();
             friend class Library;
-            void printuser() {
-                cout << name;
-                cout << tISBN;
-            }
 };
 
 class Library {
@@ -45,12 +41,14 @@ class Library {
         void BookSearch();
         void UserCheckout();
         void UserReturn();
+        void LoadUsers();
         std::vector<Books>::iterator ISBNSearch(int tISBN);
 };
 
 int main() {
     Library l;
     l.LoadBooks();
+    l.LoadUsers();
     l.MainMenu();
     l.DisplayBooks();
 }
@@ -101,11 +99,13 @@ void Books::Storedata()
 void Books::Checkout()
 {
     avail_status = 0;
+    cout << "You Have Checked Out \"" << title  << "\"By " << author << endl;
 }
 
 void Books::Return()
 {
     avail_status = 1;
+    cout << "You Have Returned \"" << title  << "\"By " << author << endl;
 }
 
 void Books::Displaybook()
@@ -264,42 +264,86 @@ void Library::UserCheckout() {
     cout << "Enter ISBN Of Book To CheckOut: ";
     cin >> tu.tISBN;
     auto CheckoutBook = ISBNSearch(tu.tISBN);
-    u.push_back(tu);
-    CheckoutBook->Checkout();
-    tu.printuser();
+    if(CheckoutBook != b.end()) {
+        tu.StoreUser();
+        u.push_back(tu);
+        CheckoutBook->Checkout();
+     }
+     else {
+        cout << "This ISBN Number Does Not Exist In Database" << endl;
+     }
+    
 }
 
 std::vector<Books>::iterator Library::ISBNSearch(int tISBN) {
-        for (auto it = b.begin(); it != b.end();) {
+            for (auto it = b.begin(); it != b.end();it++) {
             if(it->ISBN == tISBN) {
                 return it;
             }
-            else {
-                it++;
-            }
         }
+            return b.end();
     }
 
 
 void Library::UserReturn() {
-    User tu;
-    tu.getinfo();
-    for (auto it = u.begin(); it != u.end();) {
-        if(tu.name == it->name) {
+    string tname;
+    bool flag = 0;
+    cout << "Enter Your Name:  ";
+    cin.ignore();
+    getline(cin,tname);
+    for (auto it = u.begin(); it != u.end();it++) {
+        if(tname == it->name) {
             auto ReturnBook = ISBNSearch(it->tISBN);
             ReturnBook->Return();
-            it->printuser();
+            flag = 1;
             u.erase(it);
             break;
         }
-        else {
-            it++;
-        }
     }
+    if(flag == 0) {cout << "Name Does Not Exist In Database" << endl;}
 }
 
 void User::getinfo() {
     cout << "Enter Name: " << endl;
     cin.ignore();
     getline(cin,name);
+}
+
+void User::StoreUser() {
+    ofstream outfile("UserData.txt",ios::out | ios::app); 
+        if(outfile.is_open()) {
+            outfile << "name: " << name << endl;
+            outfile << "ISBN: " << tISBN << endl;     
+            outfile << ";";       
+        }
+        else {cerr << "Error Opening User File";}
+        outfile.close();
+}
+
+void Library::LoadUsers() {
+    ifstream infile("UserData.txt",ios::in); 
+        if(infile.is_open()) {
+            string line;
+        Breakaway:    
+            User uobj;
+            while(getline(infile,line)) {
+                if(line == ";") {
+                    u.push_back(uobj);
+                    goto Breakaway;
+                }
+                size_t Colon_pos = line.find(":");
+                if(Colon_pos != string::npos) {
+                    string key = line.substr(0,Colon_pos);
+                    if(key == "name") {
+                        string fname = line.substr(Colon_pos + 2);
+                        uobj.name = fname;
+                    }
+                    else if(key == "ISBN") {
+                        string fISBN = line.substr(Colon_pos + 2);
+                        uobj.tISBN = stoi(fISBN);
+                    }
+                }
+            }
+        }
+        else {cerr << "Error Loading UserData File...";}
 }
