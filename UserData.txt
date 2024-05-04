@@ -1,3 +1,0 @@
-name: faraz
-ISBN: 6646
-;

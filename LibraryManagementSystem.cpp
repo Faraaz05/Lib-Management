@@ -8,7 +8,7 @@ using namespace std;
 class Books {
     string title,author,genre;
     int ISBN;
-    bool avail_status;
+    int avail_status;
     bool Load_flag;
     public: 
         Books(bool f);
@@ -42,6 +42,8 @@ class Library {
         void UserCheckout();
         void UserReturn();
         void LoadUsers();
+        void UpdateBookData();
+        void UpdateUserData();
         std::vector<Books>::iterator ISBNSearch(int tISBN);
 };
 
@@ -51,6 +53,8 @@ int main() {
     l.LoadUsers();
     l.MainMenu();
     l.DisplayBooks();
+    l.UpdateBookData();
+    l.UpdateUserData();
 }
 
 //Books Member Funcitons
@@ -98,19 +102,28 @@ void Books::Storedata()
 
 void Books::Checkout()
 {
-    avail_status = 0;
-    cout << "You Have Checked Out \"" << title  << "\"By " << author << endl;
+    if(avail_status == 1) {
+        avail_status = 0;
+        cout << "You Have Checked Out \"" << title  << "\"By " << author << endl;
+    }
+    else {
+        cout << "Sorry.. This Book Is Currently Unavailable Please Try Again Later" << endl;
+    }
 }
 
 void Books::Return()
 {
-    avail_status = 1;
+    if(avail_status == 0) {
+        avail_status = 1;
     cout << "You Have Returned \"" << title  << "\"By " << author << endl;
+    }
+    else {cout << "You Have Not CheckedOut Any Such Book";}
 }
 
 void Books::Displaybook()
 {
     cout << endl << "Title: " << title << endl;
+    cout << "ISBN: " << ISBN << endl;
     cout << "Author: " << author << endl;
     cout << "Genre: " << genre << endl;
     cout << "Availibility: ";
@@ -303,6 +316,36 @@ void Library::UserReturn() {
     if(flag == 0) {cout << "Name Does Not Exist In Database" << endl;}
 }
 
+void Library::UpdateBookData() {
+    ofstream outfile("BookData.txt",ios::out);
+    if(outfile.is_open()) {
+        for(Books obj: b) {
+            outfile << "ISBN: " << obj.ISBN << endl;
+            outfile << "title: " << obj.title << endl;
+            outfile << "author: " << obj.author << endl;
+            outfile << "genre: " << obj.genre << endl;
+            outfile << "avail_status: " << obj.avail_status << endl;
+            outfile << ";" << endl;
+        }
+    }
+    else {cerr << "Failed To Update UserData";}
+    outfile.close();
+}
+
+void Library::UpdateUserData() {
+    ofstream outfile("UserData.txt",ios::out);
+    if(outfile.is_open()) {
+    for(User uobj: u) {
+            outfile << "name: " << uobj.name << endl;
+            outfile << "ISBN: " << uobj.tISBN << endl;     
+            outfile << ";" << endl;            
+    }
+    }
+    else {cerr << "Failed To Update User Data";}
+    outfile.close();
+}
+
+
 void User::getinfo() {
     cout << "Enter Name: " << endl;
     cin.ignore();
@@ -314,7 +357,7 @@ void User::StoreUser() {
         if(outfile.is_open()) {
             outfile << "name: " << name << endl;
             outfile << "ISBN: " << tISBN << endl;     
-            outfile << ";";       
+            outfile << ";" << endl;       
         }
         else {cerr << "Error Opening User File";}
         outfile.close();
@@ -346,4 +389,5 @@ void Library::LoadUsers() {
             }
         }
         else {cerr << "Error Loading UserData File...";}
+        infile.close();
 }
